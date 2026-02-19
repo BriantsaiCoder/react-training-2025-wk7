@@ -5,6 +5,7 @@ import { emailRules, nameRules, telRules, addressRules } from '../../Utils/check
 import { useForm } from 'react-hook-form';
 import { RotatingLines } from 'react-loader-spinner';
 import * as bootstrap from 'bootstrap';
+import useMessage from '../../hook/useMessage';
 
 const API_BASE = import.meta.env.VITE_API_BASE;
 const API_PATH = import.meta.env.VITE_API_PATH;
@@ -12,6 +13,7 @@ import ProductModal from '../../Components/ProductModal';
 import SingleProductModal from '../../Components/SingleProductModal';
 
 function Checkout() {
+  const { showSuccess, showError } = useMessage();
   const [product, setProduct] = useState({});
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
@@ -39,6 +41,7 @@ function Checkout() {
       getCart();
     } catch (error) {
       console.log(error.response.data);
+      showError('更新購物車失敗！');
     }
   };
   // 取得購物車列表
@@ -60,6 +63,7 @@ function Checkout() {
       getCart();
     } catch (error) {
       console.log(error.response.data);
+      showError('刪除購物車失敗！');
     }
   };
   // 清空購物車
@@ -70,6 +74,7 @@ function Checkout() {
       getCart();
     } catch (error) {
       console.log(error.response.data);
+      showError('清空購物車失敗！');
     }
   };
   // 取得產品列表
@@ -144,8 +149,10 @@ function Checkout() {
       const response = await axios.post(url, { data });
       console.log('訂單回應:', response.data);
       getCart();
+      showSuccess('訂單送出成功！');
     } catch (error) {
       console.error(error);
+      showError('訂單送出失敗！');
     }
   };
 
