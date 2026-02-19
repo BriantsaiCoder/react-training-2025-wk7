@@ -1,61 +1,8 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { currency } from '../../Utils/filter';
-
-const API_BASE = import.meta.env.VITE_API_BASE;
-const API_PATH = import.meta.env.VITE_API_PATH;
+import useCart from '../../hook/useCart';
 
 function Cart() {
-  const [cart, setCart] = useState([]);
-  // 更新商品數量
-  const updateCart = async (cartId, productId, qty = 1) => {
-    try {
-      const url = `${API_BASE}/api/${API_PATH}/cart/${cartId}`;
-
-      const data = {
-        product_id: productId,
-        qty,
-      };
-      await axios.put(url, { data });
-      getCart();
-    } catch (error) {
-      console.log(error.response.data);
-    }
-  };
-  // 取得購物車列表
-  const getCart = async () => {
-    try {
-      const url = `${API_BASE}/api/${API_PATH}/cart`;
-      const response = await axios.get(url);
-      setCart(response.data.data);
-    } catch (error) {
-      console.log(error.response.data);
-    }
-  };
-
-  // 清除單一筆購物車
-  const deleteCart = async (cartId) => {
-    try {
-      const url = `${API_BASE}/api/${API_PATH}/cart/${cartId}`;
-      await axios.delete(url);
-      getCart();
-    } catch (error) {
-      console.log(error.response.data);
-    }
-  };
-  // 清空購物車
-  const deleteCartAll = async () => {
-    try {
-      const url = `${API_BASE}/api/${API_PATH}/carts`;
-      await axios.delete(url);
-      getCart();
-    } catch (error) {
-      console.log(error.response.data);
-    }
-  };
-  useEffect(() => {
-    getCart();
-  }, []);
+  const { cart, updateCart, deleteCart, deleteCartAll } = useCart();
 
   return (
     // src/views/front/Cart.jsx

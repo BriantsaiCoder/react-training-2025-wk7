@@ -1,39 +1,27 @@
 import { useParams } from 'react-router';
-const API_BASE = import.meta.env.VITE_API_BASE;
-const API_PATH = import.meta.env.VITE_API_PATH;
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import useCart from '../../hook/useCart';
+
+const API_BASE = import.meta.env.VITE_API_BASE;
+const API_PATH = import.meta.env.VITE_API_PATH;
 
 function SingleProduct() {
-  // const location = useLocation();
-  // const product = location.state?.productData;
   const { id } = useParams();
   const [product, setProduct] = useState(null);
+  const { addCart } = useCart({ autoFetch: false });
+
   useEffect(() => {
     const getProductById = async (id) => {
       try {
         const res = await axios.get(`${API_BASE}/api/${API_PATH}/product/${id}`);
         setProduct(res.data.product);
-        // console.log(res.data.product);
       } catch (error) {
         console.error('取得產品資料失敗', error);
       }
     };
     getProductById(id);
   }, [id]);
-  const addCart = async (id, num) => {
-    const data = {
-      product_id: id,
-      qty: num,
-    };
-    try {
-      const url = `${API_BASE}/api/${API_PATH}/cart`;
-      const res = await axios.post(url, { data });
-      console.log(res.data);
-    } catch (error) {
-      console.log(error.response.data);
-    }
-  };
   return !product ? (
     <div>沒有可用的產品資料。</div>
   ) : (
@@ -55,7 +43,7 @@ function SingleProduct() {
           <p className='card-text'>
             <strong>現價:</strong> {product.price} 元
           </p>
-          <button className='btn btn-primary' onClick={() => addCart(product.id, 1)}>
+          <button className='btn btn-primary' onClick={() => addCart(product.id)}>
             立即購買
           </button>
         </div>

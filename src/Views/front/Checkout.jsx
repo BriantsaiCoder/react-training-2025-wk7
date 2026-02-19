@@ -1,153 +1,58 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import axios from 'axios';
 import { currency } from '../../Utils/filter';
 import { emailRules, nameRules, telRules, addressRules } from '../../Utils/checkoutValidation';
 import { useForm } from 'react-hook-form';
 import { RotatingLines } from 'react-loader-spinner';
-import * as bootstrap from 'bootstrap';
 import useMessage from '../../hook/useMessage';
+import useCart from '../../hook/useCart';
+import useProducts from '../../hook/useProducts';
+import useBootstrapModal from '../../hook/useBootstrapModal';
+import SingleProductModal from '../../Components/SingleProductModal';
 
 const API_BASE = import.meta.env.VITE_API_BASE;
 const API_PATH = import.meta.env.VITE_API_PATH;
-import ProductModal from '../../Components/ProductModal';
-import SingleProductModal from '../../Components/SingleProductModal';
 
 function Checkout() {
   const { showSuccess, showError } = useMessage();
+  const { cart, loadingCartId, addCart, updateCart, deleteCart, deleteCartAll, getCart } = useCart();
+  const { products } = useProducts();
+  const { show: showProductModal, hide: hideProductModal } = useBootstrapModal('productModal');
+
   const [product, setProduct] = useState({});
-  const [products, setProducts] = useState([]);
-  const [cart, setCart] = useState([]);
-  const [loadingCartId, setLoadingCartId] = useState(null);
   const [loadingProductId, setLoadingProductId] = useState(null);
-  const ProductModalRef = useRef(null);
+
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm({
-    mode: 'onChange',
-  });
+  } = useForm({ mode: 'onChange' });
 
-  // 更新商品數量
-  const updateCart = async (cartId, productId, qty = 1) => {
-    try {
-      const url = `${API_BASE}/api/${API_PATH}/cart/${cartId}`;
-
-      const data = {
-        product_id: productId,
-        qty,
-      };
-      await axios.put(url, { data });
-      getCart();
-    } catch (error) {
-      console.log(error.response.data);
-      showError('更新購物車失敗！');
-    }
-  };
-  // 取得購物車列表
-  const getCart = async () => {
-    try {
-      const url = `${API_BASE}/api/${API_PATH}/cart`;
-      const response = await axios.get(url);
-      setCart(response.data.data);
-    } catch (error) {
-      console.log(error.response.data);
-    }
-  };
-
-  // 清除單一筆購物車
-  const deleteCart = async (cartId) => {
-    try {
-      const url = `${API_BASE}/api/${API_PATH}/cart/${cartId}`;
-      await axios.delete(url);
-      getCart();
-    } catch (error) {
-      console.log(error.response.data);
-      showError('刪除購物車失敗！');
-    }
-  };
-  // 清空購物車
-  const deleteCartAll = async () => {
-    try {
-      const url = `${API_BASE}/api/${API_PATH}/carts`;
-      await axios.delete(url);
-      getCart();
-    } catch (error) {
-      console.log(error.response.data);
-      showError('清空購物車失敗！');
-    }
-  };
-  // 取得產品列表
-  const getProducts = async () => {
-    try {
-      const res = await axios.get(`${API_BASE}/api/${API_PATH}/products`);
-      // console.log(res.data.products);
-      setProducts(res.data.products);
-    } catch (error) {
-      console.error('取得產品資料失敗', error);
-    }
-  };
-  //取得單一產品資料
+  // 取得單一產品資料並開啟 Modal
   const handleSingleProductOverview = async (id) => {
     setLoadingProductId(id);
     try {
       const res = await axios.get(`${API_BASE}/api/${API_PATH}/product/${id}`);
       setProduct(res.data.product);
-      // console.log(res.data.product);
     } catch (error) {
       console.error('取得產品資料失敗', error);
     } finally {
       setLoadingProductId(null);
     }
-    ProductModalRef.current.show();
+    showProductModal();
   };
-  const closeProductModal = () => {
-    ProductModalRef.current.hide();
-  };
-  // 加入購物車
-  const addCart = async (id, num) => {
-    setLoadingCartId(id);
-    const data = {
-      product_id: id,
-      qty: num,
-    };
-    try {
-      const url = `${API_BASE}/api/${API_PATH}/cart`;
-      const res = await axios.post(url, { data });
-      console.log(res.data);
-      getCart();
-    } catch (error) {
-      console.log(error.response.data);
-    } finally {
-      setLoadingCartId(null);
-    }
-  };
-  useEffect(() => {
-    getProducts();
-    getCart();
-    ((ProductModalRef.current = new bootstrap.Modal('#productModal')),
-      {
-        keyboard: false,
-      });
-    // Modal 關閉時移除焦點
-    document.querySelector('#productModal').addEventListener('hide.bs.modal', () => {
-      if (document.activeElement instanceof HTMLElement) {
-        document.activeElement.blur();
-      }
-    });
-  }, []);
+
+  const closeProductModal = () => hideProductModal();
 
   // 訂單送出
   const handleOrder = async (formData) => {
-    // console.log('訂單資料:', formData);
     try {
       const url = `${API_BASE}/api/${API_PATH}/order`;
       const data = {
         user: formData,
         message: formData.message,
       };
-      const response = await axios.post(url, { data });
-      console.log('訂單回應:', response.data);
+      await axios.post(url, { data });
       getCart();
       showSuccess('訂單送出成功！');
     } catch (error) {

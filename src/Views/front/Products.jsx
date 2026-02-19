@@ -1,30 +1,9 @@
-import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
-import axios from 'axios';
-
-const API_BASE = import.meta.env.VITE_API_BASE;
-const API_PATH = import.meta.env.VITE_API_PATH;
+import useProducts from '../../hook/useProducts';
 
 function Products() {
   const navigate = useNavigate();
-  const [products, setProducts] = useState([]);
-
-  useEffect(() => {
-    /**
-     * 取得產品列表
-     */
-    const getProducts = async () => {
-      try {
-        const res = await axios.get(`${API_BASE}/api/${API_PATH}/products`);
-        // console.log(res.data.products);
-        setProducts(res.data.products);
-      } catch (error) {
-        console.error('取得產品資料失敗', error);
-      }
-    };
-
-    getProducts();
-  }, []);
+  const { products } = useProducts();
 
   const handleViewMore = (id) => {
     navigate(`/product/${id}`);
