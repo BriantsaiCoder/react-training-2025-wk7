@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router';
+import { useCookies } from 'react-cookie';
 import axios from 'axios';
 import { useForm } from 'react-hook-form';
 
@@ -7,6 +8,7 @@ import { passwordRules, usernameRules } from '../Utils/loginValidation';
 
 function Login() {
   const navigate = useNavigate();
+  const [, setCookie] = useCookies(['hexToken']);
 
   // const [formData, setFormData] = useState({
   //   username: '',
@@ -38,8 +40,11 @@ function Login() {
       const response = await axios.post(`${API_BASE}/admin/signin`, formData);
       // console.log('登入成功:', response.data);
       const { token, expired } = response.data;
-      document.cookie = `hexToken=${token};expires=${new Date(expired)};`;
-      axios.defaults.headers.common['Authorization'] = token;
+      setCookie('hexToken', token, {
+        expires: new Date(expired),
+        path: '/',
+        sameSite: 'strict',
+      });
       navigate('/admin/products');
     } catch (error) {
       console.error('登入失敗:', error.response);
