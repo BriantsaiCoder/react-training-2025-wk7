@@ -46,6 +46,27 @@ function App() {
       [name]: value, // 更新特定屬性
     }));
   };
+    const handleModalFileChange = async (e) => {
+      const url = `${API_BASE}/api/${API_PATH}/admin/upload`;
+
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      try {
+        const formData = new FormData();
+        formData.append('file-to-upload', file);
+
+        let res = await axios.post(url, formData);
+        const uploadedImageUrl = res.data.imageUrl;
+
+        setTemplateData((prevTemplateData) => ({
+          ...prevTemplateData,
+          imageUrl: uploadedImageUrl,
+        }));
+      } catch (error) {
+        console.error('Upload error:', error);
+      }
+    };
   // 表單輸入處理
   const handleModalInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -258,6 +279,7 @@ function App() {
       <ProductModal
         modalType={modalType}
         templateData={templateData}
+        handleModalFileChange={handleModalFileChange}
         handleModalInputChange={handleModalInputChange}
         handleImageChange={handleImageChange}
         handleAddImage={handleAddImage}
