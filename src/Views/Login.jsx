@@ -40,7 +40,7 @@ function Login() {
       const { token, expired } = response.data;
       document.cookie = `hexToken=${token};expires=${new Date(expired)};`;
       axios.defaults.headers.common['Authorization'] = token;
-      navigate('/');
+      navigate('/admin/products');
     } catch (error) {
       console.error('登入失敗:', error.response);
       alert('登入失敗，請確認帳號密碼是否正確');

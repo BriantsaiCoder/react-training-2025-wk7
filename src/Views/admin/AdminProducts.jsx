@@ -226,7 +226,6 @@ function AdminProducts() {
   };
   return (
     <>
-      // 登入後的產品管理頁面 (同第一週)
       <Product_list
         products={products}
         openModal={openModal}
