@@ -5,6 +5,7 @@ import * as bootstrap from 'bootstrap';
 import Product_list from '../../Components/Product_list';
 import ProductModal from '../../Components/ProductModal';
 import { useNavigate } from 'react-router';
+import useMessage from '../../hook/useMessage';
 // API 設定
 const API_BASE = import.meta.env.VITE_API_BASE;
 const API_PATH = import.meta.env.VITE_API_PATH;
@@ -31,6 +32,7 @@ function AdminProducts() {
   const [pagination, setPagination] = useState({});
   // 產品表單資料模板
   const [templateData, setTemplateData] = useState(INITIAL_TEMPLATE_DATA);
+  const { showSuccess, showError } = useMessage();
 
   const handleModalFileChange = async (e) => {
     const url = `${API_BASE}/api/${API_PATH}/admin/upload`;
@@ -122,6 +124,7 @@ function AdminProducts() {
       setPagination(response.data.pagination);
     } catch (err) {
       console.error('取得產品失敗：', err.response?.data?.message);
+      showError('產品資料取得失敗！');
     }
   };
 
@@ -155,10 +158,12 @@ function AdminProducts() {
       if (method === 'put') {
         response = await axios.put(url, productData);
         console.log('產品更新成功：', response.data);
+        showSuccess('產品更新成功！');
         // alert('產品更新成功！');
       } else {
         response = await axios.post(url, productData);
         console.log('產品新增成功：', response.data);
+          showSuccess('產品新增成功！');
         // alert('產品新增成功！');
       }
 
@@ -168,7 +173,7 @@ function AdminProducts() {
     } catch (err) {
       const errorMsg = err.response?.data?.message || err.message;
       console.error(`${modalType === 'edit' ? '更新' : '新增'}失敗：`, errorMsg);
-      alert(`${modalType === 'edit' ? '更新' : '新增'}失敗：${errorMsg}`);
+      showError(`${modalType === 'edit' ? '更新' : '新增'}失敗：${errorMsg}`);
     }
   };
   // 刪除產品
@@ -176,7 +181,7 @@ function AdminProducts() {
     try {
       const response = await axios.delete(`${API_BASE}/api/${API_PATH}/admin/product/${id}`);
       console.log('產品刪除成功：', response.data);
-      // alert('產品刪除成功！');
+      showSuccess('產品刪除成功！');
 
       // 關閉 Modal 並重新載入資料
       closeModal();
@@ -184,6 +189,7 @@ function AdminProducts() {
     } catch (err) {
       const errorMsg = err.response?.data?.message || err.message;
       console.error('刪除失敗：', errorMsg);
+      showError(`刪除失敗：${errorMsg}`);
     }
   };
   useEffect(() => {
