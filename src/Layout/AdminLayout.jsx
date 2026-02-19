@@ -1,8 +1,9 @@
+import { useState } from 'react';
 import { Outlet, Link } from 'react-router';
-import useLogout from '../hook/useLogout';
+import LogoutConfirmModal from '../Components/LogoutConfirmModal';
 
 function AdminLayout() {
-  const { logout } = useLogout();
+  const [showModal, setShowModal] = useState(false);
 
   return (
     <div>
@@ -22,16 +23,20 @@ function AdminLayout() {
             </Link>
           </li>
         </ul>
-        <button className='btn btn-outline-light btn-sm ms-auto' onClick={logout}>
+        <button className='btn btn-outline-light btn-sm ms-auto' onClick={() => setShowModal(true)}>
           登出
         </button>
       </nav>
+
       <main className='container py-4'>
         <Outlet />
       </main>
+
       <footer className='mt-5 text-center text-muted'>
         <p>© 2026 我的網站</p>
       </footer>
+
+      <LogoutConfirmModal show={showModal} onClose={() => setShowModal(false)} />
     </div>
   );
 }
