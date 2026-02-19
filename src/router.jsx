@@ -11,6 +11,7 @@ import AdminProducts from './Views/admin/AdminProducts';
 import AdminOrders from './Views/admin/AdminOrders';
 import Login from './Views/Login';
 import AdminLayout from './Layout/AdminLayout';
+import ProtectedRoute from './Components/ProtectedRoute';
 
 
 export const router = createHashRouter([
@@ -46,7 +47,11 @@ export const router = createHashRouter([
   },
   {
     path: 'admin',
-    element: <AdminLayout />,
+    element: (
+      <ProtectedRoute>
+        <AdminLayout />
+      </ProtectedRoute>
+    ),
     children: [
       {
         path: 'products',
