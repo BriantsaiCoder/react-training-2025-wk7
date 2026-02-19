@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { useCookies } from 'react-cookie';
+import Cookies from 'js-cookie';
 import axios from 'axios';
 import * as bootstrap from 'bootstrap';
 import Product_list from '../../Components/Product_list';
@@ -23,7 +23,6 @@ const INITIAL_TEMPLATE_DATA = {
 };
 function AdminProducts() {
   const navigate = useNavigate();
-  const [cookies] = useCookies(['hexToken']);
   // 產品資料狀態
   const [products, setProducts] = useState([]);
   // Modal 控制相關狀態
@@ -189,7 +188,7 @@ function AdminProducts() {
   };
   useEffect(() => {
     // 從 Cookie 取得 Token
-    const token = cookies.hexToken;
+    const token = Cookies.get('hexToken');
 
     if (token) {
       axios.defaults.headers.common.Authorization = token;
