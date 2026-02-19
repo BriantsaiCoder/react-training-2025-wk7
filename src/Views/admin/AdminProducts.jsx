@@ -1,10 +1,9 @@
 import { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import * as bootstrap from 'bootstrap';
-import './assets/style.css';
-import ProductModal from './Components/ProductModal';
-import Login from './Components/Login';
-import Product_list from './Components/Product_list';
+import Product_list from '../../Components/Product_list';
+import ProductModal from '../../Components/ProductModal';
+import { useNavigate } from 'react-router';
 // API 設定
 const API_BASE = import.meta.env.VITE_API_BASE;
 const API_PATH = import.meta.env.VITE_API_PATH;
@@ -21,15 +20,8 @@ const INITIAL_TEMPLATE_DATA = {
   imageUrl: '',
   imagesUrl: [],
 };
-function App() {
-  // 表單資料狀態(儲存登入表單輸入)
-  const [formData, setFormData] = useState({
-    username: '',
-    password: '',
-  });
-
-  // 登入狀態管理(控制顯示登入或產品頁）
-  const [isAuth, setIsAuth] = useState(false);
+function AdminProducts() {
+  const navigate = useNavigate();
   // 產品資料狀態
   const [products, setProducts] = useState([]);
   // Modal 控制相關狀態
@@ -38,35 +30,28 @@ function App() {
   const [pagination, setPagination] = useState({});
   // 產品表單資料模板
   const [templateData, setTemplateData] = useState(INITIAL_TEMPLATE_DATA);
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
 
-    setFormData((prevData) => ({
-      ...prevData, // 保留原有屬性
-      [name]: value, // 更新特定屬性
-    }));
+  const handleModalFileChange = async (e) => {
+    const url = `${API_BASE}/api/${API_PATH}/admin/upload`;
+
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const formData = new FormData();
+      formData.append('file-to-upload', file);
+
+      let res = await axios.post(url, formData);
+      const uploadedImageUrl = res.data.imageUrl;
+
+      setTemplateData((prevTemplateData) => ({
+        ...prevTemplateData,
+        imageUrl: uploadedImageUrl,
+      }));
+    } catch (error) {
+      console.error('Upload error:', error);
+    }
   };
-    const handleModalFileChange = async (e) => {
-      const url = `${API_BASE}/api/${API_PATH}/admin/upload`;
-
-      const file = e.target.files?.[0];
-      if (!file) return;
-
-      try {
-        const formData = new FormData();
-        formData.append('file-to-upload', file);
-
-        let res = await axios.post(url, formData);
-        const uploadedImageUrl = res.data.imageUrl;
-
-        setTemplateData((prevTemplateData) => ({
-          ...prevTemplateData,
-          imageUrl: uploadedImageUrl,
-        }));
-      } catch (error) {
-        console.error('Upload error:', error);
-      }
-    };
   // 表單輸入處理
   const handleModalInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -113,27 +98,6 @@ function App() {
     });
   };
 
-  // 表單提交處理
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await axios.post(`${API_BASE}/admin/signin`, formData);
-      const { token, expired } = response.data;
-      // 設定 Cookie
-      document.cookie = `hexToken=${token};expires=${new Date(expired)};`;
-
-      // 設定 axios 預設標頭
-      axios.defaults.headers.common['Authorization'] = token;
-      // 登入成功，設定 isAuth 為 true
-      setIsAuth(true);
-      // 取得產品資料
-      getData();
-    } catch (error) {
-      console.error('登入失敗:', error.response);
-      setIsAuth(false);
-      return;
-    }
-  };
   // 檢查登入狀態
   const checkLogin = async () => {
     try {
@@ -141,12 +105,11 @@ function App() {
       const res = await axios.post(`${API_BASE}/api/user/check`);
       const { success } = res.data;
       console.log('Token 驗證結果：', success);
-      setIsAuth(true);
       // 取得產品資料
       getData();
     } catch (error) {
       console.error('Token 驗證失敗：', error.response?.data);
-      setIsAuth(false);
+      navigate('/login');
     }
   };
   // 取得產品資料
@@ -263,19 +226,14 @@ function App() {
   };
   return (
     <>
-      {!isAuth ? (
-        // 登入表單畫面
-        <Login formData={formData} handleInputChange={handleInputChange} handleSubmit={handleSubmit} />
-      ) : (
-        // 登入後的產品管理頁面 (同第一週)
-        <Product_list
-          products={products}
-          openModal={openModal}
-          INITIAL_TEMPLATE_DATA={INITIAL_TEMPLATE_DATA}
-          pagination={pagination}
-          getData={getData}
-        />
-      )}
+      // 登入後的產品管理頁面 (同第一週)
+      <Product_list
+        products={products}
+        openModal={openModal}
+        INITIAL_TEMPLATE_DATA={INITIAL_TEMPLATE_DATA}
+        pagination={pagination}
+        getData={getData}
+      />
       <ProductModal
         modalType={modalType}
         templateData={templateData}
@@ -291,4 +249,4 @@ function App() {
     </>
   );
 }
-export default App;
+export default AdminProducts;

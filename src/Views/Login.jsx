@@ -1,9 +1,9 @@
 import { useNavigate } from 'react-router';
 import axios from 'axios';
 import { useForm } from 'react-hook-form';
-import { usernameRules, passwordRules } from '../../Utils/loginValidation';
 
 const API_BASE = import.meta.env.VITE_API_BASE;
+import { passwordRules, usernameRules } from '../Utils/loginValidation';
 
 function Login() {
   const navigate = useNavigate();
